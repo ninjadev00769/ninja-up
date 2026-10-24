@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ninja Sweep Code Pro - Invitación</title>
+  <style>
+    body { background: #090b10; color: #f1f5f9; font-family: sans-serif; text-align: center; padding-top: 50px; }
+    .card { background: #12151e; border: 1px solid #262b38; display: inline-block; padding: 30px; border-radius: 12px; max-width: 400px; }
+    h1 { font-size: 18px; margin-bottom: 10px; color: #10b981; }
+    p { font-size: 13px; color: #94a3b8; margin-bottom: 20px; }
+    .btn { background: #ffffff; color: #000; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🥷 Ninja Sweep Code Pro</h1>
+    <p>Estás a un paso de instalar el mejor generador de códigos. Descarga la extensión oficial para comenzar.</p>
+    <!-- Reemplaza el enlace de abajo por la ruta directa de descarga de tu archivo .crx o release en GitHub -->
+    <a href="https://ninjadev00769.github.io/ninja-sweep-latest.crx" class="btn" id="download-btn">Descargar Extensión</a>
+  </div>
+
+  <script>
+    // Captura el parámetro ?ref=NINJA-XXXX de la URL y lo guarda de forma invisible en el navegador
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      localStorage.setItem('nsc_pending_referral', refCode.toUpperCase());
+    }
+  </script>
+</body>
+</html>
