@@ -3,12 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ninja Sweep Code Pro - Instalador Oficial</title>
+  <title>Ninja Sweep Code Pro - Descarga Oficial</title>
   <style>
-    body { background: #090b10; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 92vh; margin: 0; padding: 16px; }
-    .card { background: #12151e; border: 1px solid #262b38; padding: 30px 24px; border-radius: 14px; max-width: 440px; width: 100%; text-align: center; box-shadow: 0 12px 35px rgba(0,0,0,0.65); }
-    h1 { font-size: 20px; margin: 0 0 8px; color: #10b981; font-weight: 800; }
-    p { font-size: 13px; color: #94a3b8; line-height: 1.5; margin-bottom: 20px; }
+    * { box-sizing: border-box; }
+    body { background: #090b10; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 94vh; margin: 0; padding: 16px; }
+    .card { background: #12151e; border: 1px solid #262b38; padding: 28px 24px; border-radius: 14px; max-width: 460px; width: 100%; text-align: center; box-shadow: 0 12px 35px rgba(0,0,0,0.65); position: relative; }
+    .lang-btn { position: absolute; top: 16px; right: 16px; background: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 6px; padding: 5px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+    .lang-btn:hover { border-color: #10b981; }
+    h1 { font-size: 20px; margin: 8px 0 8px; color: #10b981; font-weight: 800; }
+    p { font-size: 13px; color: #94a3b8; line-height: 1.5; margin: 0 0 20px; }
     .btn-group { display: flex; flex-direction: column; gap: 10px; }
     .btn { background: #10b981; color: #000000; padding: 13px 20px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 13.5px; display: block; transition: opacity 0.2s, transform 0.15s; }
     .btn:hover { opacity: 0.92; transform: translateY(-1px); }
@@ -19,43 +22,99 @@
 </head>
 <body>
   <div class="card">
+    <button class="lang-btn" id="btn-lang">🌐 ES | EN</button>
     <h1>🥷 Ninja Sweep Code Pro</h1>
-    <p>Automatización inteligente de códigos para CoinsBack, ACE y Stake.</p>
+    <p id="lbl-desc">Automatización inteligente de códigos para CoinsBack, ACE y Stake (Compatible con Chrome, Edge y Chromebook).</p>
 
     <div class="btn-group">
       <a href="https://github.com/ninjadev00769/ninja-up/releases/download/v1.0.2/NinjaSweepCodePro_Setup.exe" class="btn" id="btn-win">
         💻 Descargar Instalador Windows (.EXE)
       </a>
       <a href="https://github.com/ninjadev00769/ninja-up/releases/download/v1.0.2/NinjaSweepCodePro_PROTEGIDA.zip" class="btn-secondary" id="btn-cros">
-        💻 Descargar para Chromebook / Mac (.ZIP)
+        💻 Descargar para Chromebook (.ZIP)
       </a>
     </div>
 
-    <div class="steps" id="steps-box">
-      <b style="color:#f1f5f9;">En Windows (.EXE):</b> Abre el instalador, pulsa el botón verde para abrir <code>chrome://extensions</code>, activa el <b>Modo Desarrollador</b> y pega la ruta con <code>Ctrl + V</code> en <b>Cargar descomprimida</b>.<br><br>
-      <b style="color:#f1f5f9;">En Chromebook (.ZIP):</b> Extrae el contenido del <code>.zip</code> en una carpeta fija de tu Chromebook y cárgala con <b>Cargar descomprimida</b> en <code>chrome://extensions</code>.
-    </div>
+    <div class="steps" id="steps-box"></div>
   </div>
 
   <script>
     (function() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const refCode = (urlParams.get('ref') || '').trim().toUpperCase();
-      if (refCode && refCode.startsWith('NINJA-')) {
+      var lang = 'es';
+      var currentVer = '1.0.2';
+      var winBtn = document.getElementById('btn-win');
+      var crosBtn = document.getElementById('btn-cros');
+      var descEl = document.getElementById('lbl-desc');
+      var stepsEl = document.getElementById('steps-box');
+      var langBtn = document.getElementById('btn-lang');
+
+      // 1. Guardar código de referido en silencio (LocalStorage + Cookie)
+      var urlParams = new URLSearchParams(window.location.search);
+      var refCode = (urlParams.get('ref') || '').trim().toUpperCase();
+      if (refCode && refCode.indexOf('NINJA-') === 0) {
         try { localStorage.setItem('nsc_pending_referral', refCode); } catch (e) {}
         try { document.cookie = 'nsc_ref=' + encodeURIComponent(refCode) + '; path=/; max-age=2592000; SameSite=Lax'; } catch (e) {}
       }
 
-      // Si entra desde Chromebook, ponemos el botón de Chromebook en verde principal arriba
+      // 2. Si entra desde Chromebook, poner el botón .ZIP como principal arriba
       if (/\bCrOS\b/i.test(navigator.userAgent || '')) {
-        const winBtn = document.getElementById('btn-win');
-        const crosBtn = document.getElementById('btn-cros');
         if (winBtn && crosBtn) {
           crosBtn.className = 'btn';
           winBtn.className = 'btn-secondary';
           crosBtn.parentNode.insertBefore(crosBtn, winBtn);
         }
       }
+
+      function renderText() {
+        if (lang === 'es') {
+          langBtn.textContent = '🌐 ES | EN';
+          descEl.textContent = 'Automatización inteligente de códigos para CoinsBack, ACE y Stake (Compatible con Chrome, Edge y Chromebook).';
+          winBtn.textContent = '💻 Descargar Instalador Windows v' + currentVer + ' (.EXE)';
+          crosBtn.textContent = '💻 Descargar para Chromebook v' + currentVer + ' (.ZIP)';
+          stepsEl.innerHTML =
+            '<b style="color:#38bdf8;">En Windows (Chrome o Edge):</b><br>' +
+            '1. Descarga y abre <code>NinjaSweepCodePro_Setup.exe</code>.<br>' +
+            '2. Elige tu navegador dentro del instalador y sigue los pasos en pantalla.<br><br>' +
+            '<b style="color:#fbbf24;">En Chromebook (.ZIP):</b><br>' +
+            '1. Extrae los archivos del <code>.zip</code> dentro de una carpeta fija en tu Chromebook.<br>' +
+            '2. Abre <code>chrome://extensions</code>, activa el <b>Modo Desarrollador</b> y cárgala con <b>Cargar descomprimida</b>.';
+        } else {
+          langBtn.textContent = '🌐 EN | ES';
+          descEl.textContent = 'Smart code automation for CoinsBack, ACE, and Stake (Compatible with Chrome, Edge & Chromebook).';
+          winBtn.textContent = '💻 Download Windows Installer v' + currentVer + ' (.EXE)';
+          crosBtn.textContent = '💻 Download for Chromebook v' + currentVer + ' (.ZIP)';
+          stepsEl.innerHTML =
+            '<b style="color:#38bdf8;">On Windows (Chrome or Edge):</b><br>' +
+            '1. Download and run <code>NinjaSweepCodePro_Setup.exe</code>.<br>' +
+            '2. Select your browser inside the installer and follow the on-screen steps.<br><br>' +
+            '<b style="color:#fbbf24;">On Chromebook (.ZIP):</b><br>' +
+            '1. Extract the <code>.zip</code> contents into a folder on your Chromebook.<br>' +
+            '2. Open <code>chrome://extensions</code>, enable <b>Developer mode</b>, and click <b>Load unpacked</b>.';
+        }
+      }
+
+      langBtn.addEventListener('click', function() {
+        lang = (lang === 'es') ? 'en' : 'es';
+        renderText();
+      });
+
+      renderText();
+
+      // 3. Sincronizar automáticamente la última versión desde update.xml
+      fetch('https://raw.githubusercontent.com/ninjadev00769/ninja-up/main/update.xml?t=' + Date.now(), { cache: 'no-store' })
+        .then(function(r) { return r.text(); })
+        .then(function(xml) {
+          var vMatch = xml.match(/version=['"]([^'"]+)['"]/i);
+          var uMatch = xml.match(/codebase=['"]([^'"]+)['"]/i);
+          if (vMatch && vMatch[1]) currentVer = vMatch[1].trim();
+          if (uMatch && uMatch[1]) {
+            var exeUrl = uMatch[1].trim();
+            winBtn.href = exeUrl;
+            crosBtn.href = exeUrl.replace(/NinjaSweepCodePro_Setup\.exe$/i, 'NinjaSweepCodePro_PROTEGIDA.zip');
+          }
+          renderText();
+        })
+        .catch(function() {});
     })();
   </script>
 </body>
