@@ -6,18 +6,138 @@
   <title>Ninja Sweep Code Pro - Descarga Oficial</title>
   <style>
     * { box-sizing: border-box; }
-    body { background: #090b10; color: #f1f5f9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 94vh; margin: 0; padding: 16px; }
-    .card { background: #12151e; border: 1px solid #262b38; padding: 28px 24px; border-radius: 14px; max-width: 460px; width: 100%; text-align: center; box-shadow: 0 12px 35px rgba(0,0,0,0.65); position: relative; }
-    .lang-btn { position: absolute; top: 16px; right: 16px; background: #1e293b; color: #f8fafc; border: 1px solid #475569; border-radius: 6px; padding: 5px 10px; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+    body {
+      background: #090b10;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 95vh;
+      margin: 0;
+      padding: 16px;
+    }
+    .card {
+      background: #12151e;
+      border: 1px solid #262b38;
+      padding: 28px 24px;
+      border-radius: 14px;
+      max-width: 470px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.65);
+      position: relative;
+    }
+    .lang-btn {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: #1e293b;
+      color: #f8fafc;
+      border: 1px solid #475569;
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
     .lang-btn:hover { border-color: #10b981; }
-    h1 { font-size: 20px; margin: 8px 0 8px; color: #10b981; font-weight: 800; }
-    p { font-size: 13px; color: #94a3b8; line-height: 1.5; margin: 0 0 20px; }
-    .btn-group { display: flex; flex-direction: column; gap: 10px; }
-    .btn { background: #10b981; color: #000000; padding: 13px 20px; border-radius: 8px; text-decoration: none; font-weight: 800; font-size: 13.5px; display: block; transition: opacity 0.2s, transform 0.15s; }
+    h1 {
+      font-size: 20px;
+      margin: 8px 0 8px;
+      color: #10b981;
+      font-weight: 800;
+    }
+    p {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.5;
+      margin: 0 0 16px;
+    }
+    .social-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 16px 0 8px;
+    }
+    .social-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .social-btn {
+      padding: 8px 6px;
+      font-size: 12px;
+      font-weight: 800;
+      border-radius: 8px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      white-space: nowrap;
+      transition: transform 0.15s, opacity 0.2s;
+    }
+    .social-btn:hover {
+      transform: translateY(-1px);
+      opacity: 0.92;
+    }
+    .wsp-btn {
+      background: rgba(16, 185, 129, 0.14);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      color: #34d399;
+    }
+    .tg-btn {
+      background: rgba(56, 189, 248, 0.14);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      color: #7dd3fc;
+    }
+    .tt-btn {
+      background: rgba(244, 63, 94, 0.14);
+      border: 1px solid rgba(244, 63, 94, 0.5);
+      color: #fda4af;
+    }
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .btn {
+      background: #10b981;
+      color: #000000;
+      padding: 13px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: 13.5px;
+      display: block;
+      transition: opacity 0.2s, transform 0.15s;
+    }
     .btn:hover { opacity: 0.92; transform: translateY(-1px); }
-    .btn-secondary { background: #181c26; color: #f1f5f9; border: 1px solid #262b38; padding: 11px 18px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 12.5px; display: block; }
+    .btn-secondary {
+      background: #181c26;
+      color: #f1f5f9;
+      border: 1px solid #262b38;
+      padding: 11px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 12.5px;
+      display: block;
+    }
     .btn-secondary:hover { border-color: #10b981; }
-    .steps { margin-top: 20px; padding-top: 15px; border-top: 1px solid #262b38; font-size: 11.5px; color: #94a3b8; text-align: left; line-height: 1.65; }
+    .steps {
+      margin-top: 18px;
+      padding-top: 15px;
+      border-top: 1px solid #262b38;
+      font-size: 11.5px;
+      color: #94a3b8;
+      text-align: left;
+      line-height: 1.65;
+    }
   </style>
 </head>
 <body>
@@ -35,6 +155,19 @@
       </a>
     </div>
 
+    <div class="social-label" id="lbl-social">Comunidad Oficial, Guías y Tutoriales</div>
+    <div class="social-grid">
+      <a href="https://whatsapp.com/channel/0029VbDeLYTCXC3SzUuqv03W" target="_blank" rel="noopener noreferrer" class="social-btn wsp-btn">
+        📲 WhatsApp
+      </a>
+      <a href="https://t.me/ninjasweepcodepro" target="_blank" rel="noopener noreferrer" class="social-btn tg-btn">
+        ✈️ Telegram
+      </a>
+      <a href="https://www.tiktok.com/@ninjasweepcodepro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" class="social-btn tt-btn">
+        🎵 TikTok
+      </a>
+    </div>
+
     <div class="steps" id="steps-box"></div>
   </div>
 
@@ -45,6 +178,7 @@
       var winBtn = document.getElementById('btn-win');
       var crosBtn = document.getElementById('btn-cros');
       var descEl = document.getElementById('lbl-desc');
+      var socialLbl = document.getElementById('lbl-social');
       var stepsEl = document.getElementById('steps-box');
       var langBtn = document.getElementById('btn-lang');
 
@@ -65,10 +199,18 @@
         }
       }
 
+      // Copiar chrome://extensions automáticamente al descargar el .ZIP en Chromebook
+      if (crosBtn) {
+        crosBtn.addEventListener('click', function() {
+          try { navigator.clipboard.writeText('chrome://extensions'); } catch (e) {}
+        });
+      }
+
       function renderText() {
         if (lang === 'es') {
           langBtn.textContent = '🌐 ES | EN';
           descEl.textContent = 'Automatización inteligente de códigos para CoinsBack, ACE y Stake (Compatible con Chrome, Edge y Chromebook).';
+          socialLbl.textContent = 'Comunidad Oficial, Guías y Tutoriales';
           winBtn.textContent = '💻 Descargar Instalador Windows v' + currentVer + ' (.EXE)';
           crosBtn.textContent = '💻 Descargar para Chromebook v' + currentVer + ' (.ZIP)';
           stepsEl.innerHTML =
@@ -76,11 +218,12 @@
             '1. Descarga y abre <code>NinjaSweepCodePro_Setup.exe</code>.<br>' +
             '2. Elige tu navegador dentro del instalador y sigue los pasos en pantalla.<br><br>' +
             '<b style="color:#fbbf24;">En Chromebook (.ZIP):</b><br>' +
-            '1. Extrae los archivos del <code>.zip</code> dentro de una carpeta fija en tu Chromebook.<br>' +
-            '2. Abre <code>chrome://extensions</code>, activa el <b>Modo Desarrollador</b> y cárgala con <b>Cargar descomprimida</b>.';
+            '1. Abre tu carpeta Descargas, haz clic derecho en el <code>.zip</code> y pulsa <b>Extraer todo</b>.<br>' +
+            '2. Abre <code>chrome://extensions</code> (ya se copió en tu portapapeles al descargar), activa el <b>Modo Desarrollador</b> y carga la carpeta con <b>Cargar descomprimida</b>.';
         } else {
           langBtn.textContent = '🌐 EN | ES';
           descEl.textContent = 'Smart code automation for CoinsBack, ACE, and Stake (Compatible with Chrome, Edge & Chromebook).';
+          socialLbl.textContent = 'Official Community, Guides & Tutorials';
           winBtn.textContent = '💻 Download Windows Installer v' + currentVer + ' (.EXE)';
           crosBtn.textContent = '💻 Download for Chromebook v' + currentVer + ' (.ZIP)';
           stepsEl.innerHTML =
@@ -88,8 +231,8 @@
             '1. Download and run <code>NinjaSweepCodePro_Setup.exe</code>.<br>' +
             '2. Select your browser inside the installer and follow the on-screen steps.<br><br>' +
             '<b style="color:#fbbf24;">On Chromebook (.ZIP):</b><br>' +
-            '1. Extract the <code>.zip</code> contents into a folder on your Chromebook.<br>' +
-            '2. Open <code>chrome://extensions</code>, enable <b>Developer mode</b>, and click <b>Load unpacked</b>.';
+            '1. Open your Downloads folder, right-click the <code>.zip</code> file, and select <b>Extract all</b>.<br>' +
+            '2. Open <code>chrome://extensions</code> (already copied to your clipboard), turn ON <b>Developer mode</b>, and click <b>Load unpacked</b>.';
         }
       }
 
