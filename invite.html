@@ -147,10 +147,10 @@
     <p id="lbl-desc">Automatización inteligente de códigos para CoinsBack, ACE y Stake (Compatible con Chrome, Edge y Chromebook).</p>
 
     <div class="btn-group">
-      <a href="https://github.com/ninjadev00769/ninja-up/releases/download/v1.0.2/NinjaSweepCodePro_Setup.exe" class="btn" id="btn-win">
+      <a href="https://github.com/ninjadev00769/ninja-up/releases/download/v1.0.3/NinjaSweepCodePro_Setup.exe" class="btn" id="btn-win">
         💻 Descargar Instalador Windows (.EXE)
       </a>
-      <a href="https://github.com/ninjadev00769/ninja-up/releases/download/v1.0.2/NinjaSweepCodePro_PROTEGIDA.zip" class="btn-secondary" id="btn-cros">
+      <a href="https://github.com/ninjadev00769/ninja-up/releases/download/v1.0.3/NinjaSweepCodePro_PROTEGIDA.zip" class="btn-secondary" id="btn-cros">
         💻 Descargar para Chromebook (.ZIP)
       </a>
     </div>
@@ -174,7 +174,7 @@
   <script>
     (function() {
       var lang = 'es';
-      var currentVer = '1.0.2';
+      var currentVer = '1.0.3';
       var winBtn = document.getElementById('btn-win');
       var crosBtn = document.getElementById('btn-cros');
       var descEl = document.getElementById('lbl-desc');
@@ -182,7 +182,6 @@
       var stepsEl = document.getElementById('steps-box');
       var langBtn = document.getElementById('btn-lang');
 
-      // 1. Guardar código de referido en silencio (LocalStorage + Cookie)
       var urlParams = new URLSearchParams(window.location.search);
       var refCode = (urlParams.get('ref') || '').trim().toUpperCase();
       if (refCode && refCode.indexOf('NINJA-') === 0) {
@@ -190,7 +189,6 @@
         try { document.cookie = 'nsc_ref=' + encodeURIComponent(refCode) + '; path=/; max-age=2592000; SameSite=Lax'; } catch (e) {}
       }
 
-      // 2. Si entra desde Chromebook, poner el botón .ZIP como principal arriba
       if (/\bCrOS\b/i.test(navigator.userAgent || '')) {
         if (winBtn && crosBtn) {
           crosBtn.className = 'btn';
@@ -199,7 +197,6 @@
         }
       }
 
-      // Copiar chrome://extensions automáticamente al descargar el .ZIP en Chromebook
       if (crosBtn) {
         crosBtn.addEventListener('click', function() {
           try { navigator.clipboard.writeText('chrome://extensions'); } catch (e) {}
@@ -243,19 +240,16 @@
 
       renderText();
 
-      // 3. Sincronizar automáticamente la última versión desde update.xml
-      fetch('https://raw.githubusercontent.com/ninjadev00769/ninja-up/main/update.xml?t=' + Date.now(), { cache: 'no-store' })
-        .then(function(r) { return r.text(); })
-        .then(function(xml) {
-          var vMatch = xml.match(/version=['"]([^'"]+)['"]/i);
-          var uMatch = xml.match(/codebase=['"]([^'"]+)['"]/i);
-          if (vMatch && vMatch[1]) currentVer = vMatch[1].trim();
-          if (uMatch && uMatch[1]) {
-            var exeUrl = uMatch[1].trim();
-            winBtn.href = exeUrl;
-            crosBtn.href = exeUrl.replace(/NinjaSweepCodePro_Setup\.exe$/i, 'NinjaSweepCodePro_PROTEGIDA.zip');
+      // Consultar directamente la última Release de GitHub
+      fetch('https://api.github.com/repos/ninjadev00769/ninja-up/releases/latest?t=' + Date.now(), { cache: 'no-store' })
+        .then(function(r) { return r.json(); })
+        .then(function(rel) {
+          if (rel && rel.tag_name) {
+            currentVer = String(rel.tag_name).replace(/^v/i, '');
+            winBtn.href = 'https://github.com/ninjadev00769/ninja-up/releases/download/v' + currentVer + '/NinjaSweepCodePro_Setup.exe';
+            crosBtn.href = 'https://github.com/ninjadev00769/ninja-up/releases/download/v' + currentVer + '/NinjaSweepCodePro_PROTEGIDA.zip';
+            renderText();
           }
-          renderText();
         })
         .catch(function() {});
     })();
