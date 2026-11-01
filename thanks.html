@@ -37,6 +37,7 @@
       border-radius: 8px;
       margin-bottom: 20px;
       letter-spacing: 1px;
+      word-break: break-all;
     }
     .btn {
       background: #ffffff;
@@ -50,26 +51,77 @@
     }
     .btn:hover { opacity: 0.9; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
   <div class="card">
     <h1>🎉 Successful Payment!</h1>
-    <p>Thank you for subscribing to <b>Ninja Code Pro</b>. Your access license key has been successfully generated:</p>
+    <p>Thank you for subscribing to <b>Ninja Code Pro</b>. Your official license key has been generated:</p>
     
-    <div class="license-box" id="license-display">NINJA-PRO-GENERATING...</div>
+    <div class="license-box" id="license-display">Loading license...</div>
     
     <button class="btn" onclick="copyLicense()">📋 Copy Key</button>
     <p style="font-size: 11px; margin-top: 20px; color: #64748b;">Paste this key into the extension to activate your account immediately.</p>
   </div>
 
   <script>
-    function generateUniqueKey() {
-      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-      let segment = () => Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-      const uniqueKey = `NINJA-${segment()}-${segment()}-${segment()}`;
-      document.getElementById("license-display").textContent = uniqueKey;
-      localStorage.setItem("ninja_last_purchased_license", uniqueKey);
+    // 1. Pon aquí tus credenciales reales de Supabase
+    const SUPABASE_URL = 'TU_SUPABASE_URL';
+    const SUPABASE_ANON_KEY = 'TU_SUPABASE_ANON_KEY';
+    
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function initLicenseProcess() {
+      try {
+        // Obtener el session_id que envía Stripe en la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id') || 'direct_visit_' + Date.now();
+
+        // Verificar en el navegador (localStorage) si ya se generó una clave para esta compra/sesión
+        const storageKey = `ninja_license_${sessionId}`;
+        let existingKey = localStorage.getItem(storageKey);
+
+        if (existingKey) {
+          // Si ya existe, la mostramos directamente sin duplicar nada en la base de datos
+          document.getElementById("license-display").textContent = existingKey;
+          return;
+        }
+
+        // Si no existe, generamos una nueva clave única oficial
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        let segment = () => Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        const uniqueKey = `NINJA-${segment()}-${segment()}-${segment()}`;
+
+        // Mostrar en pantalla
+        document.getElementById("license-display").textContent = uniqueKey;
+
+        // Guardar en el navegador para evitar que recargas futuras cambien la clave
+        localStorage.setItem(storageKey, uniqueKey);
+
+        // Registrar la licencia en tu tabla de Supabase
+        const expiresAt = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 días
+        const { error } = await supabaseClient
+          .from('nsc_licenses')
+          .insert([
+            { 
+              license_key: uniqueKey, 
+              user_name: `Stripe User (${sessionId.slice(-6)})`, 
+              plan_type: 'pro', 
+              status: 'active', 
+              expires_at: expiresAt, 
+              max_uses: 5, 
+              current_uses: 0 
+            }
+          ]);
+
+        if (error) {
+          console.error("Error saving license to database:", error);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        document.getElementById("license-display").textContent = "NINJA-ERROR-CONTACT-SUPPORT";
+      }
     }
 
     function copyLicense() {
@@ -79,7 +131,8 @@
       });
     }
 
-    generateUniqueKey();
+    // Ejecutar al cargar la página
+    initLicenseProcess();
   </script>
 </body>
 </html>
