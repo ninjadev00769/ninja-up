@@ -102,13 +102,22 @@
     
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    function createRandomKey() {
+    // Genera siempre la misma clave única de 16 caracteres para el mismo session_id de Stripe
+    async function generateDeterministicKey(sessionId) {
       const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-      const segment = () => Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-      return `${segment()}-${segment()}-${segment()}-${segment()}`;
+      const encoder = new TextEncoder();
+      const data = encoder.encode(sessionId + "_NINJA_PRO_SALT_2026");
+      const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+      const hashArray = new Uint8Array(hashBuffer);
+      
+      let raw = "";
+      for (let i = 0; i < 16; i++) {
+        raw += chars[hashArray[i] % chars.length];
+      }
+      return `${raw.slice(0,4)}-${raw.slice(4,8)}-${raw.slice(8,12)}-${raw.slice(12,16)}`;
     }
 
-    async function initLicenseProcess() {
+    async function processLicense() {
       const displayEl = document.getElementById("license-display");
       const badgeEl = document.getElementById("plan-badge");
 
@@ -135,53 +144,64 @@
         }
 
         const storageKey = `ninja_key_${sessionId}`;
-        const cachedKey = localStorage.getItem(storageKey);
+        const deterministicKey = await generateDeterministicKey(sessionId);
 
-        if (cachedKey) {
-          displayEl.textContent = cachedKey;
+        const cachedKey = localStorage.getItem(storageKey);
+        if (cachedKey === deterministicKey) {
+          displayEl.textContent = deterministicKey;
           return;
         }
 
         const sessionTag = `Stripe_${sessionId.slice(-10)}`;
 
+        // 1. Verificar si esta clave ya fue registrada en Supabase por otra pestaña
         const { data: existingRows } = await supabaseClient
           .from('licenses')
           .select('license_key')
-          .eq('user_name', sessionTag)
+          .eq('license_key', deterministicKey)
           .limit(1);
 
         if (existingRows && existingRows.length > 0) {
-          const foundKey = existingRows[0].license_key;
-          localStorage.setItem(storageKey, foundKey);
-          displayEl.textContent = foundKey;
+          localStorage.setItem(storageKey, deterministicKey);
+          displayEl.textContent = deterministicKey;
           return;
         }
 
-        const newKey = createRandomKey();
-
+        // 2. Insertar la clave en Supabase (si otra pestaña la inserta al mismo milisegundo, ignora el choque y muestra la misma clave)
         const { error: insertError } = await supabaseClient
           .from('licenses')
           .insert([
             {
-              license_key: newKey,
+              license_key: deterministicKey,
               plan_type: selectedPlan.dbName,
               status: 'active',
               user_name: sessionTag
             }
           ]);
 
-        if (insertError) {
+        if (insertError && insertError.code !== '23505') {
           console.error("Supabase Insert Error:", insertError);
           displayEl.textContent = "ERROR SAVING LICENSE";
           return;
         }
 
-        localStorage.setItem(storageKey, newKey);
-        displayEl.textContent = newKey;
+        localStorage.setItem(storageKey, deterministicKey);
+        displayEl.textContent = deterministicKey;
 
       } catch (err) {
         console.error("Unexpected Error:", err);
         displayEl.textContent = "ERROR GENERATING KEY";
+      }
+    }
+
+    function initLicenseProcess() {
+      // Sincroniza pestañas simultáneas en el mismo navegador para que no compitan entre sí
+      if (navigator.locks && navigator.locks.request) {
+        navigator.locks.request('ninja_license_generation_lock', async () => {
+          await processLicense();
+        });
+      } else {
+        processLicense();
       }
     }
 
