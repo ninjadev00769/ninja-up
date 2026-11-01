@@ -82,7 +82,7 @@
   <div class="card">
     <h1>🎉 Successful Payment!</h1>
     <div class="plan-badge" id="plan-badge">PLAN: LOADING...</div>
-    <p>Thank you for subscribing to <b>Ninja Code Pro</b>. Your official license key is ready:</p>
+    <p>Thank you for subscribing to <b>Ninja Code Pro</b>. Your single-use official license key is ready:</p>
     
     <div class="license-box" id="license-display">GENERATING KEY...</div>
     
@@ -97,7 +97,7 @@
   </div>
 
   <script>
-    const SUPABASE_URL = 'https://cukpjfcvewjiqqpnnkks.supabase.co';
+    const SUPABASE_URL = 'https://cukpjfcvewjziqppnkks.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_bWzhO_n6s0CDWv7EVIc84w_y6sLnBqU';
     
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -144,7 +144,6 @@
 
         const sessionTag = `Stripe_${sessionId.slice(-10)}`;
 
-        // Verificar si ya existe una clave previa para esta sesión
         const { data: existingRows } = await supabaseClient
           .from('licenses')
           .select('license_key')
@@ -160,7 +159,6 @@
 
         const newKey = createRandomKey();
 
-        // Inserción limpia solo con las columnas esenciales
         const { error: insertError } = await supabaseClient
           .from('licenses')
           .insert([
