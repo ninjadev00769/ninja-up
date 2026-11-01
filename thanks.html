@@ -82,7 +82,7 @@
   <div class="card">
     <h1>🎉 Successful Payment!</h1>
     <div class="plan-badge" id="plan-badge">PLAN: LOADING...</div>
-    <p>Thank you for subscribing to <b>Ninja Code Pro</b>. Your single-use official license key is ready:</p>
+    <p>Thank you for subscribing to <b>Ninja Code Pro</b>. Your official license key is ready:</p>
     
     <div class="license-box" id="license-display">GENERATING KEY...</div>
     
@@ -126,7 +126,6 @@
         const selectedPlan = validPlans[rawPlan] || validPlans.weekly;
         badgeEl.textContent = selectedPlan.label;
 
-        // Si no viene session_id en la URL, usar un identificador único guardado en este navegador para no duplicar al abrir 2 pestañas
         if (!sessionId || sessionId === '{CHECKOUT_SESSION_ID}') {
           sessionId = localStorage.getItem('ninja_active_checkout_session');
           if (!sessionId) {
@@ -145,7 +144,7 @@
 
         const sessionTag = `Stripe_${sessionId.slice(-10)}`;
 
-        // 1. Verificar en Supabase si ya se creó una licencia para esta compra (evita duplicados si se abren 2 pestañas)
+        // Verificar si ya existe una clave previa para esta sesión
         const { data: existingRows } = await supabaseClient
           .from('licenses')
           .select('license_key')
@@ -159,10 +158,9 @@
           return;
         }
 
-        // 2. Generar clave nueva en formato XXXX-XXXX-XXXX-XXXX
         const newKey = createRandomKey();
 
-        // 3. Insertar en la tabla real 'licenses' con device_id en null para que sea de 1 solo uso al reclamarla
+        // Inserción limpia solo con las columnas esenciales
         const { error: insertError } = await supabaseClient
           .from('licenses')
           .insert([
@@ -170,8 +168,7 @@
               license_key: newKey,
               plan_type: selectedPlan.dbName,
               status: 'active',
-              user_name: sessionTag,
-              device_id: null
+              user_name: sessionTag
             }
           ]);
 
