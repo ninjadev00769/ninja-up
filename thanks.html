@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thank You! - Ninja Code Pro</title>
+  <style>
+    body {
+      background-color: #090b10;
+      color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: #12151e;
+      border: 1px solid #262b38;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      max-width: 450px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    h1 { color: #10b981; font-size: 22px; margin-bottom: 10px; }
+    p { color: #94a3b8; font-size: 13.5px; line-height: 1.5; margin-bottom: 20px; }
+    .license-box {
+      background: #181c26;
+      border: 1px solid #10b981;
+      color: #10b981;
+      font-family: monospace;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+    .btn {
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 7px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>🎉 Successful Payment!</h1>
+    <p>Thank you for subscribing to <b>Ninja Code Pro</b>. Your access license key has been successfully generated:</p>
+    
+    <div class="license-box" id="license-display">NINJA-PRO-GENERATING...</div>
+    
+    <button class="btn" onclick="copyLicense()">📋 Copy Key</button>
+    <p style="font-size: 11px; margin-top: 20px; color: #64748b;">Paste this key into the extension to activate your account immediately.</p>
+  </div>
+
+  <script>
+    function generateUniqueKey() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let segment = () => Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      const uniqueKey = `NINJA-${segment()}-${segment()}-${segment()}`;
+      document.getElementById("license-display").textContent = uniqueKey;
+      localStorage.setItem("ninja_last_purchased_license", uniqueKey);
+    }
+
+    function copyLicense() {
+      const text = document.getElementById("license-display").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Key copied to clipboard!");
+      });
+    }
+
+    generateUniqueKey();
+  </script>
+</body>
+</html>
