@@ -22,34 +22,58 @@
       border-radius: 12px;
       text-align: center;
       max-width: 450px;
+      width: 90%;
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);
     }
     h1 { color: #10b981; font-size: 22px; margin-bottom: 10px; }
     p { color: #94a3b8; font-size: 13.5px; line-height: 1.5; margin-bottom: 20px; }
+    .plan-badge {
+      display: inline-block;
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.4);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 15px;
+      text-transform: uppercase;
+    }
     .license-box {
       background: #181c26;
       border: 1px solid #10b981;
       color: #10b981;
       font-family: monospace;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: bold;
-      padding: 12px;
+      padding: 14px;
       border-radius: 8px;
       margin-bottom: 20px;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       word-break: break-all;
     }
     .btn {
       background: #ffffff;
       color: #000000;
       border: none;
-      padding: 10px 20px;
+      padding: 10px 24px;
       border-radius: 7px;
       font-weight: bold;
       cursor: pointer;
       font-size: 13px;
     }
     .btn:hover { opacity: 0.9; }
+    .steps {
+      text-align: left;
+      background: #0d1017;
+      border: 1px solid #1e2330;
+      padding: 12px 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -57,69 +81,122 @@
 
   <div class="card">
     <h1>🎉 Successful Payment!</h1>
-    <p>Thank you for subscribing to <b>Ninja Code Pro</b>. Your official license key has been generated:</p>
+    <div class="plan-badge" id="plan-badge">PLAN: LOADING...</div>
+    <p>Thank you for subscribing to <b>Ninja Code Pro</b>. Your single-use official license key is ready:</p>
     
-    <div class="license-box" id="license-display">Loading license...</div>
+    <div class="license-box" id="license-display">GENERATING KEY...</div>
     
-    <button class="btn" onclick="copyLicense()">📋 Copy Key</button>
-    <p style="font-size: 11px; margin-top: 20px; color: #64748b;">Paste this key into the extension to activate your account immediately.</p>
+    <button class="btn" id="copy-btn" onclick="copyLicense()">📋 Copy Key</button>
+
+    <div class="steps">
+      <b>How to activate your account:</b><br>
+      1. Open the extension side panel.<br>
+      2. Enter your Name or Alias in the top box.<br>
+      3. Paste this license key and click <b>Validar Cuenta</b>.
+    </div>
   </div>
 
   <script>
-    // Tus credenciales oficiales de Supabase
     const SUPABASE_URL = 'https://cukpjfcvewjiqqpnnkks.supabase.co';
     const SUPABASE_ANON_KEY = 'sb_publishable_bWzhO_n6s0CDWv7EVIc84w_y6sLnBqU';
     
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+    function createRandomKey() {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      const segment = () => Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      return `${segment()}-${segment()}-${segment()}-${segment()}`;
+    }
+
     async function initLicenseProcess() {
+      const displayEl = document.getElementById("license-display");
+      const badgeEl = document.getElementById("plan-badge");
+
       try {
         const urlParams = new URLSearchParams(window.location.search);
-        const sessionId = urlParams.get('session_id') || 'direct_visit_' + Date.now();
+        const rawPlan = (urlParams.get('plan') || 'weekly').toLowerCase();
+        let sessionId = urlParams.get('session_id');
 
-        const storageKey = `ninja_license_${sessionId}`;
-        let existingKey = localStorage.getItem(storageKey);
+        const validPlans = {
+          weekly: { dbName: 'weekly', label: 'Weekly Plan (7 Days)' },
+          monthly: { dbName: 'monthly', label: 'Monthly Plan (30 Days)' },
+          yearly: { dbName: 'yearly', label: 'Yearly Plan (365 Days)' }
+        };
 
-        if (existingKey) {
-          document.getElementById("license-display").textContent = existingKey;
+        const selectedPlan = validPlans[rawPlan] || validPlans.weekly;
+        badgeEl.textContent = selectedPlan.label;
+
+        // Si no viene session_id en la URL, usar un identificador único guardado en este navegador para no duplicar al abrir 2 pestañas
+        if (!sessionId || sessionId === '{CHECKOUT_SESSION_ID}') {
+          sessionId = localStorage.getItem('ninja_active_checkout_session');
+          if (!sessionId) {
+            sessionId = 'order_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+            localStorage.setItem('ninja_active_checkout_session', sessionId);
+          }
+        }
+
+        const storageKey = `ninja_key_${sessionId}`;
+        const cachedKey = localStorage.getItem(storageKey);
+
+        if (cachedKey) {
+          displayEl.textContent = cachedKey;
           return;
         }
 
-        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        let segment = () => Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-        const uniqueKey = `NINJA-${segment()}-${segment()}-${segment()}`;
+        const sessionTag = `Stripe_${sessionId.slice(-10)}`;
 
-        document.getElementById("license-display").textContent = uniqueKey;
-        localStorage.setItem(storageKey, uniqueKey);
+        // 1. Verificar en Supabase si ya se creó una licencia para esta compra (evita duplicados si se abren 2 pestañas)
+        const { data: existingRows } = await supabaseClient
+          .from('licenses')
+          .select('license_key')
+          .eq('user_name', sessionTag)
+          .limit(1);
 
-        const expiresAt = Date.now() + (30 * 24 * 60 * 60 * 1000); // 30 días
-        const { error } = await supabaseClient
-          .from('nsc_licenses')
+        if (existingRows && existingRows.length > 0) {
+          const foundKey = existingRows[0].license_key;
+          localStorage.setItem(storageKey, foundKey);
+          displayEl.textContent = foundKey;
+          return;
+        }
+
+        // 2. Generar clave nueva en formato XXXX-XXXX-XXXX-XXXX
+        const newKey = createRandomKey();
+
+        // 3. Insertar en la tabla real 'licenses' con device_id en null para que sea de 1 solo uso al reclamarla
+        const { error: insertError } = await supabaseClient
+          .from('licenses')
           .insert([
-            { 
-              license_key: uniqueKey, 
-              user_name: `Stripe User (${sessionId.slice(-6)})`, 
-              plan_type: 'pro', 
-              status: 'active', 
-              expires_at: expiresAt, 
-              max_uses: 5, 
-              current_uses: 0 
+            {
+              license_key: newKey,
+              plan_type: selectedPlan.dbName,
+              status: 'active',
+              user_name: sessionTag,
+              device_id: null
             }
           ]);
 
-        if (error) {
-          console.error("Error saving license to database:", error);
+        if (insertError) {
+          console.error("Supabase Insert Error:", insertError);
+          displayEl.textContent = "ERROR SAVING LICENSE";
+          return;
         }
+
+        localStorage.setItem(storageKey, newKey);
+        displayEl.textContent = newKey;
+
       } catch (err) {
-        console.error("Error:", err);
-        document.getElementById("license-display").textContent = "NINJA-ERROR-CONTACT-SUPPORT";
+        console.error("Unexpected Error:", err);
+        displayEl.textContent = "ERROR GENERATING KEY";
       }
     }
 
     function copyLicense() {
       const text = document.getElementById("license-display").textContent;
+      if (text.includes("ERROR") || text.includes("GENERATING")) return;
       navigator.clipboard.writeText(text).then(() => {
-        alert("Key copied to clipboard!");
+        const btn = document.getElementById("copy-btn");
+        btn.textContent = "✅ Copied!";
+        setTimeout(() => { btn.textContent = "📋 Copy Key"; }, 2000);
       });
     }
 
